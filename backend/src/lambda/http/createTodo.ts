@@ -8,8 +8,25 @@ import { createTodo } from '../../helpers/todos'
 
 export const handler = middy(
   async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    
     const newTodo: CreateTodoRequest = JSON.parse(event.body)
-    // TODO: Implement creating a new TODO item
+
+    //validate newTodo fields
+    if(!newTodo.name || !newTodo.dueDate || newTodo.name.trim().length < 2 || newTodo.dueDate.trim().length < 2) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
+        body: JSON.stringify({
+          message: 'Name of todo item is required and must be at least 2 characters long',
+          error: 'Todo name is required and must be at least 2 characters'
+        })
+      }
+    }
+
+
     const userId = getUserId(event)
     const item = await createTodo(userId, newTodo)
     return {
